@@ -52,11 +52,11 @@ git remote add origin https://github.com/<your-github-username>/pawssion.git
 git push -u origin main
 ```
 
-The included workflow automatically installs dependencies, runs
-`npm run build`, and deploys `dist` when you push to the repository's default
-branch. It can also be started manually from the **Actions** tab. If prompted,
-set the repository's **Settings → Pages → Build and deployment** source to
-**GitHub Actions**.
+Set the repository's **Settings → Pages → Build and deployment** source to
+**GitHub Actions** once. After that, the included workflow automatically
+installs dependencies, runs `npm run build`, and deploys `dist` when you push
+to the repository's default branch. It can also be started manually from the
+**Actions** tab.
 
 After the first successful deployment, find the live URL under **Settings →
 Pages**. For a repository named `pawssion`, it will be
