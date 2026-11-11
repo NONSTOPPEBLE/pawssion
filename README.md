@@ -41,9 +41,29 @@ npm run preview
 
 ## Publish to GitHub Pages
 
-Push to the `main` branch to automatically install dependencies, build the site with `npm run build`, and deploy the `dist` folder to GitHub Pages. The workflow can also be started manually from the repository's **Actions** tab.
+Create a **public** GitHub repository named `pawssion` without adding a README,
+license, or `.gitignore`, then run these commands from the project folder:
 
-After the first successful deployment, find the live URL under **Settings → Pages**. With the repository named `pawssion`, it will be `https://<your-github-username>.github.io/pawssion/`. The project and source files must be public to use GitHub Pages on GitHub Free.
+```bash
+git init -b main
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/<your-github-username>/pawssion.git
+git push -u origin main
+```
+
+The included workflow automatically installs dependencies, runs
+`npm run build`, and deploys `dist` when you push to the repository's default
+branch. It can also be started manually from the **Actions** tab. If prompted,
+set the repository's **Settings → Pages → Build and deployment** source to
+**GitHub Actions**.
+
+After the first successful deployment, find the live URL under **Settings →
+Pages**. For a repository named `pawssion`, it will be
+`https://<your-github-username>.github.io/pawssion/`. If you name the repository
+`<your-github-username>.github.io`, the site URL is
+`https://<your-github-username>.github.io/`. GitHub Pages is free for public
+repositories; the included `github.io` address does not require buying a domain.
 
 ## Companion model
 
