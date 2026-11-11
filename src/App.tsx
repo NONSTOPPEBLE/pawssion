@@ -19,8 +19,6 @@ import {
   Pause,
   Play,
   Plus,
-  Upload,
-  X,
 } from "lucide-react";
 
 const CatScene = lazy(() => import("./components/CatScene"));
@@ -105,8 +103,6 @@ function ActCopy({
 export default function App() {
   const runwayRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const objectUrlRef = useRef("");
   const petTimerRef = useRef<number | null>(null);
   const lastVideoTimeRef = useRef(-1);
   const syncAfterSeekRef = useRef<(() => void) | null>(null);
@@ -117,8 +113,6 @@ export default function App() {
   const [paletteIndex, setPaletteIndex] = useState(0);
   const [videoSrc, setVideoSrc] = useState(videoChoices[0].src);
   const [videoTitle, setVideoTitle] = useState(videoChoices[0].label);
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [bagAdded, setBagAdded] = useState(false);
   const [scrollCueVisible, setScrollCueVisible] = useState(true);
   const [autoPlaying, setAutoPlaying] = useState(false);
@@ -274,60 +268,8 @@ export default function App() {
     if (value > 0.04) setScrollCueVisible(false);
   });
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === "u" && !event.repeat) {
-        const target = event.target as HTMLElement | null;
-        if (target?.isContentEditable || target?.matches("input, textarea, select")) return;
-        setUploadOpen((open) => !open);
-      }
-      if (event.key === "Escape") setUploadOpen(false);
-    };
-    const onDragOver = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(true);
-    };
-    const onDragLeave = (event: DragEvent) => {
-      if (event.relatedTarget === null) setIsDragging(false);
-    };
-    const onDrop = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(false);
-      const file = Array.from(event.dataTransfer?.files ?? []).find((item) =>
-        item.type === "video/mp4" || item.name.toLowerCase().endsWith(".mp4"),
-      );
-      if (file) loadLocalVideo(file);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("dragover", onDragOver);
-    window.addEventListener("dragleave", onDragLeave);
-    window.addEventListener("drop", onDrop);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("dragover", onDragOver);
-      window.removeEventListener("dragleave", onDragLeave);
-      window.removeEventListener("drop", onDrop);
-    };
-  }, []);
-
   useEffect(() => () => {
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     if (petTimerRef.current !== null) window.clearTimeout(petTimerRef.current);
-  }, []);
-
-  const loadLocalVideo = useCallback((file: File) => {
-    if (file.type !== "video/mp4" && !file.name.toLowerCase().endsWith(".mp4")) return;
-    autoPlayingRef.current = false;
-    setAutoPlaying(false);
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
-    const url = URL.createObjectURL(file);
-    objectUrlRef.current = url;
-    setVideoSrc(url);
-    setVideoTitle(file.name);
-    setMode("video");
-    setUploadOpen(false);
-    lastVideoTimeRef.current = -1;
   }, []);
 
   const chooseVideo = (src: string, label: string) => {
@@ -362,12 +304,6 @@ export default function App() {
   const addToBag = () => {
     setBagAdded(true);
     window.setTimeout(() => setBagAdded(false), 2200);
-  };
-
-  const onFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.currentTarget.files?.[0];
-    if (file) loadLocalVideo(file);
-    event.currentTarget.value = "";
   };
 
   return (
@@ -644,42 +580,6 @@ export default function App() {
           </div>
         )}
 
-        {mode === "video" && (
-          <button className="upload-hint hud-interactive" onClick={() => setUploadOpen(true)}>
-            <Upload size={13} /> <span>PRESS U TO LOAD YOUR FILM</span>
-          </button>
-        )}
-
-        <AnimatePresence>
-          {uploadOpen && (
-            <motion.div
-              className="upload-modal hud-interactive"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onMouseDown={(event) => {
-                if (event.target === event.currentTarget) setUploadOpen(false);
-              }}
-            >
-              <motion.div
-                className={`upload-panel ${isDragging ? "upload-panel-dragging" : ""}`}
-                initial={{ y: 18, scale: 0.98 }}
-                animate={{ y: 0, scale: 1 }}
-                exit={{ y: 12, scale: 0.98 }}
-              >
-                <button className="upload-close" onClick={() => setUploadOpen(false)} aria-label="Close upload"><X size={16} /></button>
-                <Upload size={21} />
-                <span className="upload-kicker">YOUR FILM, YOUR STORY</span>
-                <strong>{isDragging ? "Drop your film here" : "Bring a video to life."}</strong>
-                <p>Choose an MP4 or drop it anywhere on the page.<br />Scroll to move through it frame by frame.</p>
-                <button className="upload-select" onClick={() => fileInputRef.current?.click()}>CHOOSE AN MP4 <ArrowUpRight size={13} /></button>
-                <span className="upload-shortcut">KEYBOARD SHORTCUT <kbd>U</kbd></span>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <input ref={fileInputRef} className="sr-only" type="file" accept="video/mp4,.mp4" onChange={onFileInput} />
         <span className="sr-only" aria-live="polite">{mode === "video" ? `Video scrub mode: ${videoTitle}` : "3D studio mode"}</span>
       </section>
       <div className="scroll-spacer" aria-hidden="true" />
